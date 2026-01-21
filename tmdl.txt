@@ -633,7 +633,7 @@ createOrReplace
 
 		column FinishedGoodsFlag
 			dataType: int64
-			formatString: 0
+			formatString: 0.00
 			lineageTag: 935fa97a-9bcb-47de-acf2-ad7b82396d96
 			summarizeBy: sum
 			sourceColumn: FinishedGoodsFlag
@@ -650,7 +650,7 @@ createOrReplace
 
 		column SafetyStockLevel
 			dataType: int64
-			formatString: 0
+			formatString: 0.00
 			lineageTag: 2b62a2b0-6250-44e2-82dc-a520cd811417
 			summarizeBy: sum
 			sourceColumn: SafetyStockLevel
