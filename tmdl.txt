@@ -1,0 +1,1516 @@
+createOrReplace
+
+	table Kalkulasjoner
+		lineageTag: 7d71a3ca-bd3c-482a-9154-a0b0a748c43e
+
+		measure Salg = SUMX(FactInternetSales, FactInternetSales[UnitPrice] * FactInternetSales[OrderQuantity])
+			formatString: 0.00
+			lineageTag: d58c0b0f-f0b2-4e7e-94bf-60dccedb3ca8
+
+		measure 'Salg svarte produkter' =
+				
+				CALCULATE([Salg], DimProduct[Color] = "Black")
+			formatString: 0.00
+			lineageTag: 0a831775-9b74-4388-b739-b23020cf73a6
+
+		measure 'Salg hittil i år' =
+				
+				TOTALYTD([Salg], DimDate[Date])
+			formatString: 0.00
+			lineageTag: f53488a4-5492-4713-bc5a-a2b264beba39
+
+		measure 'Salg hittil forrige år' =
+				
+				CALCULATE (
+				    [Salg hittil i år],
+				    SAMEPERIODLASTYEAR(DimDate[Date])
+				)
+			formatString: 0.00
+			lineageTag: f3b594e1-5758-4580-99fc-67d28c93a6ed
+
+		measure 'Andel salg av svarte produkt' = ```
+				
+				DIVIDE (
+				    [Salg svarte produkter], 
+				    [Salg]
+				)
+				```
+			formatString: 0.00
+			lineageTag: c2e0fa6d-55c9-487c-91e5-e070f784e1cc
+
+		measure '% endring i salg fra forrige periode' =
+				
+				VAR _SalgSPLY = CALCULATE([Salg], SAMEPERIODLASTYEAR(DimDate[Date]))
+				RETURN
+				DIVIDE (
+				    [Salg] - _SalgSPLY, _SalgSPLY)
+			formatString: 0.00
+			lineageTag: 255731f5-91a6-4b26-8f4e-306c1b871c8b
+
+		measure '% endring i totalt salg fra forrige periode' =
+				
+				DIVIDE(
+				    [Salg hittil i år] - [Salg hittil forrige år],
+				    [Salg hittil forrige år]
+				)
+			formatString: 0.00
+			lineageTag: 4e90e8b0-5d11-4ef6-9ca3-85c9e8d2f9bb
+
+		partition Kalkulasjoner = m
+			mode: import
+			source =
+					let
+					    Kilde = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Kolonne1 = _t]),
+					    #"Endret type" = Table.TransformColumnTypes(Kilde,{{"Kolonne1", type text}}),
+					    #"Fjernede kolonner" = Table.RemoveColumns(#"Endret type",{"Kolonne1"})
+					in
+					    #"Fjernede kolonner"
+
+		annotation PBI_ResultType = Table
+
+	table DimCustomer
+		lineageTag: 288ede60-c535-41fc-b772-9a3cde28cfb8
+
+		column CustomerKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 6a45cbd8-000c-493f-a8cd-b799859774b1
+			summarizeBy: none
+			sourceColumn: CustomerKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column GeographyKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 368ab363-f32a-448d-8c3f-4ec067a683ca
+			summarizeBy: none
+			sourceColumn: GeographyKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column CustomerAlternateKey
+			dataType: string
+			lineageTag: 173c210d-87d6-4206-8842-77e0b9fa3bb7
+			summarizeBy: none
+			sourceColumn: CustomerAlternateKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column Title
+			dataType: string
+			lineageTag: 343e1c46-ecb4-4bda-94b0-75ddf78af83c
+			summarizeBy: none
+			sourceColumn: Title
+
+			annotation SummarizationSetBy = Automatic
+
+		column FirstName
+			dataType: string
+			lineageTag: ee4addc0-b7f5-4577-8d87-0a5f54a156cc
+			summarizeBy: none
+			sourceColumn: FirstName
+
+			annotation SummarizationSetBy = Automatic
+
+		column MiddleName
+			dataType: string
+			lineageTag: 3037830e-0f89-46f3-be8e-fba30e080a3d
+			summarizeBy: none
+			sourceColumn: MiddleName
+
+			annotation SummarizationSetBy = Automatic
+
+		column LastName
+			dataType: string
+			lineageTag: 6f34cb09-c1cb-4359-aa2c-2310f5a3421b
+			summarizeBy: none
+			sourceColumn: LastName
+
+			annotation SummarizationSetBy = Automatic
+
+		column NameStyle
+			dataType: int64
+			formatString: 0
+			lineageTag: fbcf251f-3833-446b-9ae4-4a69afda1d2a
+			summarizeBy: sum
+			sourceColumn: NameStyle
+
+			annotation SummarizationSetBy = Automatic
+
+		column MaritalStatus
+			dataType: string
+			lineageTag: 0ff232ee-8cf3-48ed-ad66-3cab937e2cb8
+			summarizeBy: none
+			sourceColumn: MaritalStatus
+
+			annotation SummarizationSetBy = Automatic
+
+		column Suffix
+			dataType: string
+			lineageTag: 39c70e88-b73b-4872-b9d3-d64c1561bfbb
+			summarizeBy: none
+			sourceColumn: Suffix
+
+			annotation SummarizationSetBy = Automatic
+
+		column Gender
+			dataType: string
+			lineageTag: 304cfa6b-be02-40db-999d-dbc8e325ffb8
+			summarizeBy: none
+			sourceColumn: Gender
+
+			annotation SummarizationSetBy = Automatic
+
+		column EmailAddress
+			dataType: string
+			lineageTag: b0f86109-b79e-48ac-8cfa-92e7c00c9525
+			summarizeBy: none
+			sourceColumn: EmailAddress
+
+			annotation SummarizationSetBy = Automatic
+
+		column YearlyIncome
+			dataType: string
+			lineageTag: 65650721-6b3b-4291-b75e-789956db1e54
+			summarizeBy: none
+			sourceColumn: YearlyIncome
+
+			annotation SummarizationSetBy = Automatic
+
+		column TotalChildren
+			dataType: int64
+			formatString: 0
+			lineageTag: 6092920a-e288-4a76-9c8b-b419e00f7c05
+			summarizeBy: sum
+			sourceColumn: TotalChildren
+
+			annotation SummarizationSetBy = Automatic
+
+		column NumberChildrenAtHome
+			dataType: int64
+			formatString: 0
+			lineageTag: 2960b8f2-4f4f-4ee9-aad4-b9ffa026696e
+			summarizeBy: sum
+			sourceColumn: NumberChildrenAtHome
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishEducation
+			dataType: string
+			lineageTag: 1a5c0779-78b6-45cf-bf2f-48b8484f1c7b
+			summarizeBy: none
+			sourceColumn: EnglishEducation
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishEducation
+			dataType: string
+			lineageTag: 6cbea193-c7a2-48a2-9fea-6970241b2e27
+			summarizeBy: none
+			sourceColumn: SpanishEducation
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchEducation
+			dataType: string
+			lineageTag: c9408a57-f0ed-450c-8412-25e72a3fdcb6
+			summarizeBy: none
+			sourceColumn: FrenchEducation
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishOccupation
+			dataType: string
+			lineageTag: 53488605-111f-4170-8c50-8eecf5aa7b94
+			summarizeBy: none
+			sourceColumn: EnglishOccupation
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishOccupation
+			dataType: string
+			lineageTag: 04c58479-5743-4e60-af73-2a4ee43ac92d
+			summarizeBy: none
+			sourceColumn: SpanishOccupation
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchOccupation
+			dataType: string
+			lineageTag: 8b31b8af-5bf1-4908-8582-61d2b6791aa1
+			summarizeBy: none
+			sourceColumn: FrenchOccupation
+
+			annotation SummarizationSetBy = Automatic
+
+		column HouseOwnerFlag
+			dataType: int64
+			formatString: 0
+			lineageTag: cd1cd766-cfb3-4b12-bd59-bf3299daf7fb
+			summarizeBy: sum
+			sourceColumn: HouseOwnerFlag
+
+			annotation SummarizationSetBy = Automatic
+
+		column NumberCarsOwned
+			dataType: int64
+			formatString: 0
+			lineageTag: d2324cc0-2b67-45c2-9bb0-769ad557f305
+			summarizeBy: sum
+			sourceColumn: NumberCarsOwned
+
+			annotation SummarizationSetBy = Automatic
+
+		column AddressLine1
+			dataType: string
+			lineageTag: 039b84a9-0c98-4b7a-a647-bd85d9678252
+			summarizeBy: none
+			sourceColumn: AddressLine1
+
+			annotation SummarizationSetBy = Automatic
+
+		column Phone
+			dataType: string
+			lineageTag: 136041db-580d-48bb-8e92-7e237a607e34
+			summarizeBy: none
+			sourceColumn: Phone
+
+			annotation SummarizationSetBy = Automatic
+
+		column DateFirstPurchase
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: b4e59f03-b72b-4cc3-9267-13df2d1ceffa
+			summarizeBy: none
+			sourceColumn: DateFirstPurchase
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column CommuteDistance
+			dataType: string
+			lineageTag: 2eea9ef4-4743-4037-b008-fa545b0bc135
+			summarizeBy: none
+			sourceColumn: CommuteDistance
+
+			annotation SummarizationSetBy = Automatic
+
+		column BirthDate
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: 071cd430-3cab-4233-b554-b4444a2cba0c
+			summarizeBy: none
+			sourceColumn: BirthDate
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		partition DimCustomer = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimCustomer"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Table
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table DimDate
+		lineageTag: d31eded2-7f23-49f0-9e27-c185ffc16d4b
+
+		column Date
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: 24f43c22-1d70-4836-aea3-36f2d1f7568c
+			summarizeBy: none
+			sourceColumn: Date
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column Year
+			dataType: int64
+			formatString: 0
+			lineageTag: c714b887-eee8-4137-8870-0312f26f23d1
+			summarizeBy: sum
+			sourceColumn: Year
+
+			annotation SummarizationSetBy = Automatic
+
+		column Quarter
+			dataType: string
+			lineageTag: 489c2bf8-f842-49dd-8b51-f0ca221c2318
+			summarizeBy: none
+			sourceColumn: Quarter
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Week Number'
+			dataType: int64
+			formatString: 0
+			lineageTag: 1c798395-efba-4a13-b64d-5da0564f122c
+			summarizeBy: sum
+			sourceColumn: Week Number
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Month Number'
+			dataType: int64
+			formatString: 0
+			lineageTag: 3c66d640-8401-4c21-967d-0b227611b7df
+			summarizeBy: sum
+			sourceColumn: Month Number
+
+			annotation SummarizationSetBy = Automatic
+
+		column Month
+			dataType: string
+			lineageTag: 7c73ce8d-d05e-485b-a1e8-6df51964e23b
+			summarizeBy: none
+			sourceColumn: Month
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Day of Week'
+			dataType: string
+			lineageTag: 0b10d6be-9b80-4fb0-b4dc-020887ce65e9
+			summarizeBy: none
+			sourceColumn: Day of Week
+
+			annotation SummarizationSetBy = Automatic
+
+		column Month_short
+			dataType: string
+			lineageTag: d5fdaa35-932a-4827-93af-0937cd497adb
+			summarizeBy: none
+			sourceColumn: Month_short
+
+			annotation SummarizationSetBy = Automatic
+
+		column Day
+			dataType: int64
+			formatString: 0
+			lineageTag: 9cb956bd-a839-4553-84c0-8997b0b867d3
+			summarizeBy: sum
+			sourceColumn: Day
+
+			annotation SummarizationSetBy = Automatic
+
+		column Year_month_short
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: b182c8f8-2388-45d0-aa2f-60fc223d9e83
+			summarizeBy: none
+			sourceColumn: Year_month_short
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column dateformat
+			dataType: int64
+			formatString: 0
+			lineageTag: dedf1ca7-6a41-4f65-925c-4dada0391d08
+			summarizeBy: sum
+			sourceColumn: dateformat
+
+			annotation SummarizationSetBy = Automatic
+
+		column 'Day of Year'
+			dataType: int64
+			formatString: 0
+			lineageTag: ac2d7e6c-8bf9-4fe1-b3ff-8a7e0d9a2797
+			summarizeBy: sum
+			sourceColumn: Day of Year
+
+			annotation SummarizationSetBy = Automatic
+
+		partition DimDate = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimDate"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Table
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table DimGeography
+		lineageTag: cfd25e79-8592-4c98-a53d-0d9e459ea6ec
+
+		column GeographyKey
+			dataType: int64
+			formatString: 0
+			lineageTag: f20c1bcb-9cee-4054-a9e8-529768405d14
+			summarizeBy: none
+			sourceColumn: GeographyKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column City
+			dataType: string
+			lineageTag: 213b1911-a68c-47be-ac19-3be536269e5e
+			summarizeBy: none
+			sourceColumn: City
+
+			annotation SummarizationSetBy = Automatic
+
+		column StateProvinceCode
+			dataType: string
+			lineageTag: d2710745-0ab6-4420-8eee-89980d957d07
+			summarizeBy: none
+			sourceColumn: StateProvinceCode
+
+			annotation SummarizationSetBy = Automatic
+
+		column StateProvinceName
+			dataType: string
+			lineageTag: 7e7dd889-8ba1-4dce-a4a3-d6e6abf47ed7
+			summarizeBy: none
+			sourceColumn: StateProvinceName
+
+			annotation SummarizationSetBy = Automatic
+
+		column CountryRegionCode
+			dataType: string
+			lineageTag: 6e6f030f-5dfb-446d-bfa8-55c14e42056b
+			summarizeBy: none
+			sourceColumn: CountryRegionCode
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishCountryRegionName
+			dataType: string
+			lineageTag: f4a6398c-64dd-488c-bc95-d1038eba5877
+			summarizeBy: none
+			sourceColumn: EnglishCountryRegionName
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishCountryRegionName
+			dataType: string
+			lineageTag: 358feee7-f4eb-46bd-96ea-e5563a1a0bbb
+			summarizeBy: none
+			sourceColumn: SpanishCountryRegionName
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchCountryRegionName
+			dataType: string
+			lineageTag: ec2b6491-b964-4920-8072-7b8bffb8f4c1
+			summarizeBy: none
+			sourceColumn: FrenchCountryRegionName
+
+			annotation SummarizationSetBy = Automatic
+
+		column PostalCode
+			dataType: string
+			lineageTag: af7f75d9-9343-47d2-b44e-83fea52fa5fc
+			summarizeBy: none
+			sourceColumn: PostalCode
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesTerritoryKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 5d0a3857-5523-47ec-ae87-2b9bbae5ef04
+			summarizeBy: none
+			sourceColumn: SalesTerritoryKey
+
+			annotation SummarizationSetBy = Automatic
+
+		partition DimGeography = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimGeography"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Table
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table DimProduct
+		lineageTag: 340e1260-fb95-4b26-8a0c-2be5c0e057a4
+
+		column ID
+			dataType: int64
+			formatString: 0
+			lineageTag: eb1999cc-6aa9-4c0f-9259-14931b068e3b
+			summarizeBy: count
+			sourceColumn: ID
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 39ae1ea0-3f48-456e-bdfb-243a0517dbb1
+			summarizeBy: none
+			sourceColumn: ProductKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductAlternateKey
+			dataType: string
+			lineageTag: 6fbc7383-4032-4c1f-85df-c36777e8776e
+			summarizeBy: none
+			sourceColumn: ProductAlternateKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductSubcategoryKey
+			dataType: int64
+			formatString: 0
+			lineageTag: d385c080-3559-4ccc-a6bf-acb6fc200b72
+			summarizeBy: none
+			sourceColumn: ProductSubcategoryKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column WeightUnitMeasureCode
+			dataType: string
+			lineageTag: 4309a516-483b-41ee-a90d-55037da05c86
+			summarizeBy: none
+			sourceColumn: WeightUnitMeasureCode
+
+			annotation SummarizationSetBy = Automatic
+
+		column SizeUnitMeasureCode
+			dataType: string
+			lineageTag: 6b665ba1-18d0-4b6a-b442-5e5ff82b7386
+			summarizeBy: none
+			sourceColumn: SizeUnitMeasureCode
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishProductName
+			dataType: string
+			lineageTag: 818b94b4-aa12-4e36-a05f-de6049f018ba
+			summarizeBy: none
+			sourceColumn: EnglishProductName
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishProductName
+			dataType: string
+			lineageTag: a1bec588-d1ff-49c2-a59d-f9384e16574c
+			summarizeBy: none
+			sourceColumn: SpanishProductName
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchProductName
+			dataType: string
+			lineageTag: 7ba31626-b45d-4981-8259-36fd6f81d7cc
+			summarizeBy: none
+			sourceColumn: FrenchProductName
+
+			annotation SummarizationSetBy = Automatic
+
+		column StandardCost
+			dataType: double
+			lineageTag: e1f66fc8-10b6-4a67-b349-601f45a9fe37
+			summarizeBy: sum
+			sourceColumn: StandardCost
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column FinishedGoodsFlag
+			dataType: int64
+			formatString: 0
+			lineageTag: 935fa97a-9bcb-47de-acf2-ad7b82396d96
+			summarizeBy: sum
+			sourceColumn: FinishedGoodsFlag
+
+			annotation SummarizationSetBy = Automatic
+
+		column Color
+			dataType: string
+			lineageTag: 811c28f6-0935-4ef9-9610-7a638246854b
+			summarizeBy: none
+			sourceColumn: Color
+
+			annotation SummarizationSetBy = Automatic
+
+		column SafetyStockLevel
+			dataType: int64
+			formatString: 0
+			lineageTag: 2b62a2b0-6250-44e2-82dc-a520cd811417
+			summarizeBy: sum
+			sourceColumn: SafetyStockLevel
+
+			annotation SummarizationSetBy = Automatic
+
+		column ReorderPoint
+			dataType: int64
+			formatString: 0
+			lineageTag: 195aee16-8227-4eb3-b041-0b396fbc48a6
+			summarizeBy: sum
+			sourceColumn: ReorderPoint
+
+			annotation SummarizationSetBy = Automatic
+
+		column ListPrice
+			dataType: double
+			lineageTag: 5684332f-1a65-4148-990f-c2dd0bdf6054
+			summarizeBy: sum
+			sourceColumn: ListPrice
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column Size
+			dataType: string
+			lineageTag: 344a8174-3c2e-46f2-8547-c7b1c0ebc684
+			summarizeBy: none
+			sourceColumn: Size
+
+			annotation SummarizationSetBy = Automatic
+
+		column SizeRange
+			dataType: string
+			lineageTag: e20d80c5-5f94-4ec4-9edb-287e14205ff5
+			summarizeBy: none
+			sourceColumn: SizeRange
+
+			annotation SummarizationSetBy = Automatic
+
+		column Weight
+			dataType: double
+			lineageTag: 0dd5333b-00c4-43bf-b56f-42a5a29cc151
+			summarizeBy: sum
+			sourceColumn: Weight
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column DaysToManufacture
+			dataType: int64
+			formatString: 0
+			lineageTag: e3abacbf-9bfb-475e-a4ce-bb1dc5a3fd1f
+			summarizeBy: sum
+			sourceColumn: DaysToManufacture
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductLine
+			dataType: string
+			lineageTag: 3ad21d31-e4dd-4371-b0f0-c8675a5a78e0
+			summarizeBy: none
+			sourceColumn: ProductLine
+
+			annotation SummarizationSetBy = Automatic
+
+		column DealerPrice
+			dataType: double
+			lineageTag: e7d79c60-cf5b-4d8c-ab13-5586e949b713
+			summarizeBy: sum
+			sourceColumn: DealerPrice
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column Class
+			dataType: string
+			lineageTag: d68e2306-f240-471d-9861-4dd5b0c54705
+			summarizeBy: none
+			sourceColumn: Class
+
+			annotation SummarizationSetBy = Automatic
+
+		column Style
+			dataType: string
+			lineageTag: 6e32efde-9beb-4799-959b-2149f42a8b94
+			summarizeBy: none
+			sourceColumn: Style
+
+			annotation SummarizationSetBy = Automatic
+
+		column ModelName
+			dataType: string
+			lineageTag: b0c247e6-1a99-4fb4-b71a-46e90dc2bd09
+			summarizeBy: none
+			sourceColumn: ModelName
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishDescription
+			dataType: string
+			lineageTag: 3da8b5e6-4429-42c3-82cb-60ebb095feb7
+			summarizeBy: none
+			sourceColumn: EnglishDescription
+
+			annotation SummarizationSetBy = Automatic
+
+		column Status
+			dataType: string
+			lineageTag: b5b3a8aa-f065-4712-bd17-585c47b1da8c
+			summarizeBy: none
+			sourceColumn: Status
+
+			annotation SummarizationSetBy = Automatic
+
+		partition DimProduct = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimProduct"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Table
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table DimProductCategory
+		lineageTag: 908629a6-31a0-4ba4-a3fc-27544636c1d7
+
+		column ProductCategoryKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 8f21d5dd-25e8-462f-a3fe-43523b00f238
+			summarizeBy: none
+			sourceColumn: ProductCategoryKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductCategoryAlternateKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 983d4fe4-7257-4617-870c-54922da991d3
+			summarizeBy: none
+			sourceColumn: ProductCategoryAlternateKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishProductCategoryName
+			dataType: string
+			lineageTag: ee5c44b3-e0e1-4877-8ae9-8aa8847f7e2b
+			summarizeBy: none
+			sourceColumn: EnglishProductCategoryName
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishProductCategoryName
+			dataType: string
+			lineageTag: 62a7a7ce-0653-494c-b66a-495e386dde69
+			summarizeBy: none
+			sourceColumn: SpanishProductCategoryName
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchProductCategoryName
+			dataType: string
+			lineageTag: 29150ab4-61c7-4c04-aec1-29f3b6114801
+			summarizeBy: none
+			sourceColumn: FrenchProductCategoryName
+
+			annotation SummarizationSetBy = Automatic
+
+		partition DimProductCategory = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimProductCategory"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Table
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table DimProductSubCategory
+		lineageTag: e11aea87-ebc2-4e2e-8b4c-eb486587314f
+
+		column ProductSubcategoryKey
+			dataType: int64
+			formatString: 0
+			lineageTag: a62622e7-62fc-4426-b791-9fc7f5492ae9
+			summarizeBy: none
+			sourceColumn: ProductSubcategoryKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductSubcategoryAlternateKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 7e8ea358-d670-4e44-94ce-0ef3e4de30d9
+			summarizeBy: count
+			sourceColumn: ProductSubcategoryAlternateKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishProductSubcategoryName
+			dataType: string
+			lineageTag: 0d7904fe-c8ad-427f-af90-40ea4525e87d
+			summarizeBy: none
+			sourceColumn: EnglishProductSubcategoryName
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishProductSubcategoryName
+			dataType: string
+			lineageTag: c66bdc35-7644-4e1d-a57f-c0d59f54a944
+			summarizeBy: none
+			sourceColumn: SpanishProductSubcategoryName
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchProductSubcategoryName
+			dataType: string
+			lineageTag: 2a0dd55c-4770-41c1-b081-c0de312e1b39
+			summarizeBy: none
+			sourceColumn: FrenchProductSubcategoryName
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductCategoryKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 5909c03a-321b-4cfd-9c3c-25e5d76cc5ff
+			summarizeBy: none
+			sourceColumn: ProductCategoryKey
+
+			annotation SummarizationSetBy = Automatic
+
+		partition DimProductSubCategory = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimProductSubCategory"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Exception
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table DimPromotion
+		lineageTag: 1a3480f6-8ab3-4fec-b76a-708df8da925a
+
+		column PromotionKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 4e1bc6fe-9cf3-4d83-94cb-3437d95f8df8
+			summarizeBy: none
+			sourceColumn: PromotionKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column PromotionAlternateKey
+			dataType: int64
+			formatString: 0
+			lineageTag: d404f86e-1f48-461b-997d-7d3cb35e7072
+			summarizeBy: count
+			sourceColumn: PromotionAlternateKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishPromotionName
+			dataType: string
+			lineageTag: e04d48e2-6261-4625-ab13-fb0185c29291
+			summarizeBy: none
+			sourceColumn: EnglishPromotionName
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishPromotionName
+			dataType: string
+			lineageTag: ae8ac83f-da54-4069-a998-224a44d33527
+			summarizeBy: none
+			sourceColumn: SpanishPromotionName
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchPromotionName
+			dataType: string
+			lineageTag: 54cbe5c7-82f2-404b-858b-2268569fe17b
+			summarizeBy: none
+			sourceColumn: FrenchPromotionName
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiscountPct
+			dataType: double
+			lineageTag: accecbe8-297a-4f5c-953d-7dedae746fdf
+			summarizeBy: sum
+			sourceColumn: DiscountPct
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column EnglishPromotionType
+			dataType: string
+			lineageTag: 787e5013-fc18-4bb5-bc05-c75bb5971332
+			summarizeBy: none
+			sourceColumn: EnglishPromotionType
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishPromotionType
+			dataType: string
+			lineageTag: 36cc139d-9a64-4f75-8f34-76a17f67db8a
+			summarizeBy: none
+			sourceColumn: SpanishPromotionType
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchPromotionType
+			dataType: string
+			lineageTag: 8bcb9d8a-b5b5-435d-8420-5dcbe558bf09
+			summarizeBy: none
+			sourceColumn: FrenchPromotionType
+
+			annotation SummarizationSetBy = Automatic
+
+		column EnglishPromotionCategory
+			dataType: string
+			lineageTag: 4125c3d5-7729-490d-afa7-27d2f1a17e44
+			summarizeBy: none
+			sourceColumn: EnglishPromotionCategory
+
+			annotation SummarizationSetBy = Automatic
+
+		column SpanishPromotionCategory
+			dataType: string
+			lineageTag: 08cdae76-6f7a-4007-803e-e29e10d070c4
+			summarizeBy: none
+			sourceColumn: SpanishPromotionCategory
+
+			annotation SummarizationSetBy = Automatic
+
+		column FrenchPromotionCategory
+			dataType: string
+			lineageTag: 774ebd21-ae94-45bb-a2e3-d8e6b1e75392
+			summarizeBy: none
+			sourceColumn: FrenchPromotionCategory
+
+			annotation SummarizationSetBy = Automatic
+
+		column StartDate
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: 2f194288-7a18-4bd1-86ce-96065733609a
+			summarizeBy: none
+			sourceColumn: StartDate
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column EndDate
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: 55272b9a-540f-414a-8658-4db97d35fb05
+			summarizeBy: none
+			sourceColumn: EndDate
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column MinQty
+			dataType: int64
+			formatString: 0
+			lineageTag: d57db3ad-857e-4d98-ae04-f724f80c259f
+			summarizeBy: sum
+			sourceColumn: MinQty
+
+			annotation SummarizationSetBy = Automatic
+
+		column MaxQty
+			dataType: int64
+			formatString: 0
+			lineageTag: 3aeb8276-06cd-4cb6-a30f-d0ed19ce209a
+			summarizeBy: sum
+			sourceColumn: MaxQty
+
+			annotation SummarizationSetBy = Automatic
+
+		partition DimPromotion = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimPromotion"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Exception
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table DimSalesTerritory
+		lineageTag: e8eed2b8-7abe-4098-b578-15e2f1c60645
+
+		column SalesTerritoryKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 05ea6dc0-2d85-4c28-8603-d0f1c6afe215
+			summarizeBy: none
+			sourceColumn: SalesTerritoryKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesTerritoryAlternateKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 18a597cd-1ce9-4753-980c-c5bdd5daba5f
+			summarizeBy: none
+			sourceColumn: SalesTerritoryAlternateKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesTerritoryRegion
+			dataType: string
+			lineageTag: e2f86646-8591-4c4e-9c76-49cd2f356b30
+			summarizeBy: none
+			sourceColumn: SalesTerritoryRegion
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesTerritoryCountry
+			dataType: string
+			lineageTag: 8cd4e783-921b-4856-b245-53c5587e019e
+			summarizeBy: none
+			sourceColumn: SalesTerritoryCountry
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesTerritoryGroup
+			dataType: string
+			lineageTag: 0f8b087f-a1cb-4bd6-ab7a-49a3f78a1662
+			summarizeBy: none
+			sourceColumn: SalesTerritoryGroup
+
+			annotation SummarizationSetBy = Automatic
+
+		partition DimSalesTerritory = m
+			mode: import
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="DimSalesTerritory"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_ResultType = Table
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+	table FactInternetSales
+		lineageTag: 3e580880-45ae-4fd0-a307-61370c8dc87a
+
+		column ProductKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 58698a73-8898-4d9a-bbda-ad723fcd4ea0
+			summarizeBy: none
+			sourceColumn: ProductKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column CustomerKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 76abedde-b4c2-4ed9-b0c6-f460e74b5c8e
+			summarizeBy: none
+			sourceColumn: CustomerKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column PromotionKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 37523ce8-69f2-46c8-8968-749a97bb4c1a
+			summarizeBy: none
+			sourceColumn: PromotionKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column CurrencyKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 11aec585-c5fe-4067-a3df-6cff736d7d03
+			summarizeBy: count
+			sourceColumn: CurrencyKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesTerritoryKey
+			dataType: int64
+			formatString: 0
+			lineageTag: 75189861-7797-4306-9850-b54f2b278fa3
+			summarizeBy: count
+			sourceColumn: SalesTerritoryKey
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesOrderNumber
+			dataType: string
+			lineageTag: de6e6225-1f67-4116-813b-7017fe055088
+			summarizeBy: none
+			sourceColumn: SalesOrderNumber
+
+			annotation SummarizationSetBy = Automatic
+
+		column SalesOrderLineNumber
+			dataType: int64
+			formatString: 0
+			lineageTag: 835fb51e-b96b-43ba-8299-d72e01b631bb
+			summarizeBy: sum
+			sourceColumn: SalesOrderLineNumber
+
+			annotation SummarizationSetBy = Automatic
+
+		column RevisionNumber
+			dataType: int64
+			formatString: 0
+			lineageTag: 05c22b33-eea2-4ac6-9197-3db7183f44ed
+			summarizeBy: sum
+			sourceColumn: RevisionNumber
+
+			annotation SummarizationSetBy = Automatic
+
+		column OrderQuantity
+			dataType: int64
+			formatString: 0
+			lineageTag: d86bd2a8-8d91-4e71-b7f6-2749d7aab80c
+			summarizeBy: sum
+			sourceColumn: OrderQuantity
+
+			annotation SummarizationSetBy = Automatic
+
+		column UnitPrice
+			dataType: double
+			lineageTag: 8b5c553d-c2e2-4d4b-b814-6f1bb9889cea
+			summarizeBy: sum
+			sourceColumn: UnitPrice
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column ExtendedAmount
+			dataType: double
+			lineageTag: 5ea7cec7-cd45-4214-9946-b3e02d8aeda5
+			summarizeBy: sum
+			sourceColumn: ExtendedAmount
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column UnitPriceDiscountPct
+			dataType: double
+			formatString: 0
+			lineageTag: 31526dd9-6294-4e6a-91e3-b88c9d913c7d
+			summarizeBy: sum
+			sourceColumn: UnitPriceDiscountPct
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiscountAmount
+			dataType: double
+			formatString: 0
+			lineageTag: a8c6599d-1ae2-4ac9-95cd-afcd464d8a49
+			summarizeBy: sum
+			sourceColumn: DiscountAmount
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProductStandardCost
+			dataType: double
+			lineageTag: a240793f-bff7-4b9b-a7ed-88c1b5cbcdde
+			summarizeBy: sum
+			sourceColumn: ProductStandardCost
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column TotalProductCost
+			dataType: double
+			lineageTag: f1d47af8-7936-492d-aff7-eb4f9718c44a
+			summarizeBy: sum
+			sourceColumn: TotalProductCost
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column SalesAmount
+			dataType: double
+			lineageTag: 7315d8d4-ed1b-4c4d-b069-d78177ebbd87
+			summarizeBy: sum
+			sourceColumn: SalesAmount
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column TaxAmt
+			dataType: double
+			lineageTag: 3e7fac10-a62a-444d-91fb-711d944a6300
+			summarizeBy: sum
+			sourceColumn: TaxAmt
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column Freight
+			dataType: double
+			lineageTag: e1a357ff-4016-4238-a89c-983bcb36a92c
+			summarizeBy: sum
+			sourceColumn: Freight
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+		column CarrierTrackingNumber
+			dataType: string
+			lineageTag: c8cd66b6-0457-4de7-8b4e-8462b0101b67
+			summarizeBy: none
+			sourceColumn: CarrierTrackingNumber
+
+			annotation SummarizationSetBy = Automatic
+
+		column CustomerPONumber
+			dataType: string
+			lineageTag: 272a9c00-2897-42af-ba6d-f0430d8e40ee
+			summarizeBy: none
+			sourceColumn: CustomerPONumber
+
+			annotation SummarizationSetBy = Automatic
+
+		column Field2
+			dataType: string
+			lineageTag: 866a52d1-9f9c-449c-9bd6-a8e25f51127c
+			summarizeBy: none
+			sourceColumn: Field2
+
+			annotation SummarizationSetBy = Automatic
+
+		column RegionMonthID
+			dataType: string
+			lineageTag: 0505d9a5-c047-474c-bf1f-12f94312721a
+			summarizeBy: none
+			sourceColumn: RegionMonthID
+
+			annotation SummarizationSetBy = Automatic
+
+		column OrderDate
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: 907ae8df-611a-4719-9c78-ac91a006d2e8
+			summarizeBy: none
+			sourceColumn: OrderDate
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column DueDate
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: c0ebafc3-f011-4905-826b-581342540934
+			summarizeBy: none
+			sourceColumn: DueDate
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column ShipDate
+			dataType: dateTime
+			formatString: Long Date
+			lineageTag: 5534d383-83c8-4cd9-bc56-858d45185c6b
+			summarizeBy: none
+			sourceColumn: ShipDate
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		partition FactInternetSales = m
+			mode: directQuery
+			source =
+					let
+					    Kilde = Sql.Database("ol5bpq4twpvejkd45its5dmwhu-dql3sno24jcelplt4dfe6tfha4.datawarehouse.fabric.microsoft.com", "PIA_Fagkveld"),
+					    dbo_DimCustomer = Kilde{[Schema="dbo",Item="FactInternetSales"]}[Data]
+					in
+					    dbo_DimCustomer
+
+		annotation PBI_NavigationStepName = Navigasjon
+
+		annotation PBI_ResultType = Table
+
+	table KalkulasjonerBeskrivelse
+		lineageTag: 7a5491f8-17a0-4c86-809c-fd7c8bed799c
+
+		column ID
+			formatString: 0
+			lineageTag: 24ce8b01-8c2e-4e71-800a-1b597da0d5c6
+			summarizeBy: count
+			isNameInferred
+			sourceColumn: [ID]
+
+			annotation SummarizationSetBy = Automatic
+
+		column Name
+			lineageTag: 43e1a846-6884-4d53-b7a5-165ac739ba99
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [Name]
+
+			annotation SummarizationSetBy = Automatic
+
+		column Table
+			lineageTag: 2eabc13f-c379-4457-bd2b-32c125cd6f16
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [Table]
+
+			annotation SummarizationSetBy = Automatic
+
+		column Description
+			lineageTag: c007f352-8873-49f9-a519-c9eacf73e7fa
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [Description]
+
+			annotation SummarizationSetBy = Automatic
+
+		column DataType
+			lineageTag: fb4b95b5-8730-43ec-ab15-6e32cbf809fc
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [DataType]
+
+			annotation SummarizationSetBy = Automatic
+
+		column Expression
+			lineageTag: d77b473b-3982-4d19-9772-ec702ba5bcca
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [Expression]
+
+			annotation SummarizationSetBy = Automatic
+
+		column FormatString
+			lineageTag: 97e7de86-deb3-4541-8789-e5f813df4b4f
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [FormatString]
+
+			annotation SummarizationSetBy = Automatic
+
+		column IsHidden
+			formatString: """TRUE"";""TRUE"";""FALSE"""
+			lineageTag: 447c5951-f65e-4dea-93cc-c7e9bb626f73
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [IsHidden]
+
+			annotation SummarizationSetBy = Automatic
+
+		column State
+			lineageTag: 07585c6c-9fd8-4391-8065-a3b706a228c6
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [State]
+
+			annotation SummarizationSetBy = Automatic
+
+		column KPIID
+			formatString: 0
+			lineageTag: 1930ccef-4879-4899-b4b0-f5e32241187c
+			summarizeBy: count
+			isNameInferred
+			sourceColumn: [KPIID]
+
+			annotation SummarizationSetBy = Automatic
+
+		column IsSimpleMeasure
+			formatString: """TRUE"";""TRUE"";""FALSE"""
+			lineageTag: 2473f885-8585-4e33-9569-bc2c22a726a5
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [IsSimpleMeasure]
+
+			annotation SummarizationSetBy = Automatic
+
+		column DisplayFolder
+			lineageTag: c5125635-f241-450b-92cf-f638e12489bd
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [DisplayFolder]
+
+			annotation SummarizationSetBy = Automatic
+
+		column DetailRowsDefinition
+			lineageTag: caeb3607-8088-44aa-9a96-f187144e2a5d
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [DetailRowsDefinition]
+
+			annotation SummarizationSetBy = Automatic
+
+		column DataCategory
+			lineageTag: 30d576de-9dcd-4d26-bc6f-2a3b4ce5ec72
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [DataCategory]
+
+			annotation SummarizationSetBy = Automatic
+
+		column FormatStringDefinition
+			lineageTag: e13f350e-df3c-4339-828d-b3d00be2abf0
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [FormatStringDefinition]
+
+			annotation SummarizationSetBy = Automatic
+
+		column LineageTag
+			lineageTag: 407cfab4-6b3d-4142-ae1e-0bac820cf0e0
+			summarizeBy: none
+			isNameInferred
+			sourceColumn: [LineageTag]
+
+			annotation SummarizationSetBy = Automatic
+
+		partition KalkulasjonerBeskrivelse = calculated
+			mode: import
+			source = ```
+					
+					INFO.VIEW.MEASURES() 
+					```
+
+		annotation PBI_Id = 45af2d3a26eb4854880d03f525ba4f50
+
